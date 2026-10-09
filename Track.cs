@@ -8,25 +8,22 @@ namespace lab1{
         private int key;
         private string title;
         private string artist;
-        private int duration;
         private int count_listen;
         private static int count_tracks = 0;
-        private static readonly int MAX_DURATION = 3600;
         private PlayList pl; // Ссылка на внешний объект
+        private readonly Duration duration;
 
         private string[] genre;
 
         // Конструктор с параметрами по умолчанию
         public Track(int key, int duration=1, int count_listen = 1)
         {
-            if (duration < 1 || duration > MAX_DURATION)
-                throw new ArgumentException($"Некорретная длительность. Только от 1 до {MAX_DURATION}\n");
             if (count_listen < 0)
                 throw new ArgumentException("Число прослушиваний не может быть отрицательным\n");
             this.key = key;
             this.title = "Unknown";
             this.artist = "NoName";
-            this.duration = duration;
+            this.duration = new Duration(duration);
             this.count_listen = count_listen;
             this.genre = new string[0];
             count_tracks++;
@@ -39,8 +36,6 @@ namespace lab1{
         {
             if (key < 0)
                 throw new ArgumentException("Номер отрицательный\n");
-            if (duration < 1 || duration > MAX_DURATION)
-                throw new ArgumentException($"Некорретная длительность. Только от 1 до {MAX_DURATION}\n");
             if (count_listen < 0)
                 throw new ArgumentException("Число прослушиваний не может быть отрицательным\n");
             if (title is null)
@@ -49,7 +44,7 @@ namespace lab1{
             this.key = key;
             this.title = title;
             this.artist = artist;
-            this.duration = duration;
+            this.duration = new Duration(duration);
             this.count_listen = count_listen;
             count_tracks++;
             this.genre = (string[])genre.Clone();
@@ -60,7 +55,7 @@ namespace lab1{
         public int Key => key;
         public string Title => title;
         public string Artist => artist;
-        public int Duration => duration;
+        public int Duration => duration.Seconds;
         public int Count_listen => count_listen;
         public string[] Genre => genre;
         public PlayList playList => pl;
@@ -78,7 +73,7 @@ namespace lab1{
 
         public override String ToString()
         {
-            return $"Номер: {key}\nИмя: {title}\nИсполнитель: {artist}\nДлительность трека: {duration}\nЧисло прослушиваний: {count_listen}\nСписок жанров: {(genre.Length > 0 ? string.Join(", ", genre) : "нет")}";
+            return $"Номер: {key}\nИмя: {title}\nИсполнитель: {artist}\nДлительность трека: {duration.Seconds}\nЧисло прослушиваний: {count_listen}\nСписок жанров: {(genre.Length > 0 ? string.Join(", ", genre) : "нет")}";
         }
 
         // Работа с жанрами 
