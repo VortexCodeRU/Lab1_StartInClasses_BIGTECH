@@ -2,93 +2,43 @@ using System;
 using lab1;
 
 namespace lab1{
-    public class Track
+    public class Track : MediaItem
     {
         // поля
-        private int key;
-        private string title;
-        private string artist;
-        private int count_listen;
         private static int count_tracks = 0;
-        private PlayList pl; // Ссылка на внешний объект
         private readonly Duration duration;
 
         private string[] genre;
 
         // Конструктор с параметрами по умолчанию
-        public Track(int key, int duration=1, int count_listen = 1)
+        public Track(int key, int duration=1, int count_listen = 1) : base(key, "Unknown", "NoName", count_listen)
         {
-            if (count_listen < 0)
-                throw new ArgumentException("Число прослушиваний не может быть отрицательным\n");
-            this.key = key;
-            this.title = "Unknown";
-            this.artist = "NoName";
             this.duration = new Duration(duration);
-            this.count_listen = count_listen;
             this.genre = new string[0];
             count_tracks++;
-
-            this.pl = new PlayList();
         }
 
         // Конструктор с конкретными значениями
-        public Track(int key, string title, string artist, int duration, int count_listen, string[] genre)
+        public Track(int key, string title, string artist, int duration, int count_listen, string[] genre) : base(key, title, artist, count_listen)
         {
-            if (key < 0)
-                throw new ArgumentException("Номер отрицательный\n");
-            if (count_listen < 0)
-                throw new ArgumentException("Число прослушиваний не может быть отрицательным\n");
-            if (title is null)
-                throw new ArgumentException("Название не должно быть пустым\n");
-
-            this.key = key;
-            this.title = title;
-            this.artist = artist;
             this.duration = new Duration(duration);
-            this.count_listen = count_listen;
             count_tracks++;
             this.genre = (string[])genre.Clone();
-
-            this.pl = new PlayList();
         }
         // Геттеры
-        public int Key => key;
-        public string Title => title;
-        public string Artist => artist;
         public int Duration => duration.Seconds;
-        public int Count_listen => count_listen;
         public string[] Genre => genre;
-        public PlayList playList => pl;
 
-        public void play() { play(1); } // Иначе дублирование логики
-
-        public void play(int times)
-        {
-            if (times < 1)
-            {
-                throw new ArgumentException($"Некорретное число прослушиваний\n");
-            }
-            this.count_listen += times;
-        }
-
-        public override String ToString()
-        {
-            return $"Номер: {key}\nИмя: {title}\nИсполнитель: {artist}\nДлительность трека: {duration.Seconds}\nЧисло прослушиваний: {count_listen}\nСписок жанров: {(genre.Length > 0 ? string.Join(", ", genre) : "нет")}";
-        }
 
         // Работа с жанрами 
-        public string[] getGenre()
+        public string[] getGenre() => genre; // Плохая практика
+        public string[] getGenres() => (string[])genre.Clone();
+        // Прочие методы
+        public static int GetTrackCount() => count_tracks;
+        public override int GetDuration() => duration.Seconds;
+        public override String ToString()
         {
-            return genre; // Плохая практика
-        }
-        public string[] getGenres()
-        {
-            return (string[])genre.Clone();
-        }
-        
-        public static int GetTrackCount()
-        {
-            return count_tracks;
+            return base.ToString() + $"Список жанров: {(genre.Length > 0 ? string.Join(", ", genre) : "нет")}";
         }
     }
 }

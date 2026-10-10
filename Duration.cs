@@ -14,5 +14,6 @@ namespace lab1
         }
 
         public int Seconds => seconds;
+        public int scam_duration => MAX_DURATION;
     }
 }
