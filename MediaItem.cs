@@ -42,5 +42,10 @@ namespace lab1
         {
             return $"Номер: {_key}\nИмя: {_title}\nИсполнитель: {_artist}\nЧисло прослушиваний: {_count_listen}\n";
         }
+        // у большинства жанров нет
+        public virtual string[] GetGenres()
+        {
+            return Array.Empty<string>();
+        }
     }
 }

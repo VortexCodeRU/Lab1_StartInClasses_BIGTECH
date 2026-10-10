@@ -1,53 +1,59 @@
 using System;
 using lab1;
 
-namespace lab1{
+namespace lab1
+{
     // Класс-контейнер
     public class PlayList
     {
-        private Track[] playLists; // Хранилище
+        //private Track[] playLists; // Хранилище
+        private MediaItem[] items;
         private int count;
+        private SelectionRule rule;
 
-        public PlayList(int capacity = 15)
+        public PlayList(SelectionRule rule = null, int capacity = 15)
         {
             if (capacity < 1)
                 throw new ArgumentException("Размер плейлиста должен бытьь больше 0");
-            playLists = new Track[capacity];
+            if (rule is null)
+                throw new ArgumentException("Правило не задано");
+            items = new MediaItem[capacity];
             count = 0;
+            this.rule = rule;
         }
-        public Track[] GetTracks()
+        public MediaItem[] GetItems()
         {
-            Track[] copy = new Track[count];
-            Array.Copy(playLists, copy, count);
+            MediaItem[] copy = new MediaItem[count];
+            Array.Copy(items, copy, count);
             return copy;
         }
 
-        public void Add(Track track)
+        public void Add(MediaItem item)
         {
             int[] digits = new int[count]; // Проверка на занятые ключи
             for (int i = 0; i < count; i++)
             {
-                digits[i] = playLists[i].Key;
+                digits[i] = items[i].Key;
             }
 
             for (int i = 0; i < count; i++) 
             {
-                if (playLists[i].Key == track.Key)
-                    throw new ArgumentException($"Трек с ключом {track.Key} существует.\nЗанятые ключи: {string.Join(", ", digits)}\n");
+                if (items[i].Key == item.Key)
+                    throw new ArgumentException($"Трек с ключом {item.Key} существует.\nЗанятые ключи: {string.Join(", ", digits)}\n");
             }
             // Проверка памяти
-            if (count >= playLists.Length)
+            if (count >= items.Length)
             {
-                Array.Resize(ref playLists, playLists.Length * 2);
+                Array.Resize(ref items, items.Length * 2);
             }
-            playLists[count] = track;
+            items[count] = item;
             count++;
         }
         public void remove(int num)
         {
             int index = -1;
             for (int i = 0; i < count; i++) {
-                if (playLists[i].Key == num)
+                if (items[i].Key == num)
                 {
                     index = i; break;
                 }
@@ -57,9 +63,9 @@ namespace lab1{
 
             for (int j = index; j < count - 1; j++)
             {
-                playLists[j] = playLists[j + 1];
+                items[j] = items[j + 1];
             }
-            playLists[count - 1] = null;
+            items[count - 1] = null;
             count--;
         }
 
@@ -68,7 +74,7 @@ namespace lab1{
             int result_sum = 0;
             for (int i = 0; i < count; i++)
             {
-                result_sum += playLists[i].Duration;
+                result_sum += items[i].GetDuration();
             }
             return result_sum;
         }
@@ -79,45 +85,29 @@ namespace lab1{
                 throw new ArgumentException("Плейлист пуст\n");
             }
             int best = 0;
-            Track best_track = null;
+            MediaItem best_track = null;
             for (int i = 0; i < count; i++)
             {
-                if (best < playLists[i].Count_listen)
+                if (best < items[i].Count_listen)
                 {
-                    best = playLists[i].Count_listen;
-                    best_track = playLists[i];
+                    best = items[i].Count_listen;
+                    best_track = items[i];
                 }
             }
             return $"Самый популярный трек - {best_track.Title} от '{best_track.Artist}'";
-        }
-
-        public void sort()
-        {
-            // Пузырьковая сортировка
-            for (int j = 0; j < count - 1; j++) {
-                for (int i = 0; i < count - 1; i++)
-                {
-                    if (playLists[i + 1].Count_listen < playLists[i].Count_listen)
-                    {
-                        Track a = playLists[i + 1];
-                        playLists[i + 1] = playLists[i];
-                        playLists[i] = a;
-                    }
-                }
-            }
         }
         public string[] GetAllGenres() // Вывод всех добавленных уникальных жанров
         {
             int total = 0;
             for (int i = 0; i < count; i++)
             {
-                total += playLists[i].getGenres().Length;
+                total += items[i].GetGenres().Length;
             }
             string[] result = new string[total];
             int unique_index = 0;
             for (int i = 0;i < count; i++)
             {
-                string[] genres = playLists[i].getGenres();
+                string[] genres = items[i].GetGenres();
                 for (int j = 0; j < genres.Length; j++)
                 {
                     bool flag = true;
@@ -142,6 +132,18 @@ namespace lab1{
         public int len()
         {
             return count;
+        }
+
+        public void SetRule(SelectionRule rule)
+        {
+            if (rule is null)
+                throw new ArgumentNullException("Правило не задано");
+            this.rule = rule;
+        }
+
+        public void ApplySort()
+        {
+            rule.sort(items, count);
         }
     }
 }

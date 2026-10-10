@@ -30,9 +30,8 @@ namespace lab1{
         public string[] Genre => genre;
 
 
-        // Работа с жанрами 
-        public string[] getGenre() => genre; // Плохая практика
-        public string[] getGenres() => (string[])genre.Clone();
+        // Работа с жанрами
+        public override string[] GetGenres() => (string[])genre.Clone();
         // Прочие методы
         public static int GetTrackCount() => count_tracks;
         public override int GetDuration() => duration.Seconds;

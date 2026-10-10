@@ -43,11 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audiobook.cs" />
     <Compile Include="Duration.cs" />
     <Compile Include="MediaItem.cs" />
     <Compile Include="PlayList.cs" />
+    <Compile Include="Podcast.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectionRule.cs" />
     <Compile Include="Track.cs" />
   </ItemGroup>
   <ItemGroup>

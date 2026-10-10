@@ -1,5 +1,6 @@
-﻿using System;
-using lab1;
+﻿using lab1;
+using System;
+using System.Net.NetworkInformation;
 
 namespace lab1{
     public class Program
@@ -16,8 +17,11 @@ namespace lab1{
                 Track t6 = new Track(50);
                 Track t7 = new Track(51);
 
+                SelectionRule byKey = new KeySelectionRule();
+                SelectionRule byPopular = new PopularSelectionRule();
+                SelectionRule byRandom = new RandomSelectionRule();
 
-                PlayList playList = new PlayList();
+                PlayList playList = new PlayList(byKey);
                 TryAdd(playList, t1);
                 TryAdd(playList, t2);
                 TryAdd(playList, t3);// ошибка
@@ -32,7 +36,7 @@ namespace lab1{
                 //Console.WriteLine(t1);
 
                 Console.WriteLine("Список треков в плейлисте:");
-                foreach (Track music in playList.GetTracks())
+                foreach (Track music in playList.GetItems())
                 {
                     Console.WriteLine("Трек:");
                     Console.WriteLine($"{music}\n");
@@ -40,33 +44,23 @@ namespace lab1{
                 }
                 Console.WriteLine($"Всего треков в плейлисте: {playList.len()}");
                 Console.WriteLine("-------------------------------------------------------");
-                playList.sort();
+                Console.WriteLine("* Плейлист отсортирован по ключам *");
+                playList.ApplySort();
+                Print(playList);
+                Console.WriteLine("-------------------------------------------------------");
                 Console.WriteLine("* Плейлист отсортирован по количеству прослушиваний *");
-                Console.WriteLine("Список треков в плейлисте:");
-                foreach (Track music in playList.GetTracks())
-                {
-                    Console.WriteLine("Трек:");
-                    Console.WriteLine($"{music}\n");
-
-                }
+                playList.SetRule(byPopular);
+                playList.ApplySort();
+                Print(playList);
+                Console.WriteLine("-------------------------------------------------------");
+                Console.WriteLine("* Плейлист отсортирован в произвольном порядке *");
+                playList.SetRule(byRandom);
+                playList.ApplySort();
+                Print(playList);
                 Console.WriteLine("-------------------------------------------------------");
                 Console.WriteLine(playList.Popular_track());
                 Console.WriteLine($"Суммарная длительность прослушиваний: {playList.sum_duration_inSeconds()} сек или {playList.sum_duration_inSeconds() / 60} мин");
                 Console.WriteLine($"Количество созданных объектов: {Track.GetTrackCount()}");
-                Console.WriteLine("-------------------------------------------------------");
-                Console.WriteLine("Плохая практика работы геттера. Внешний код способен изменять содержимое ;(\nРезультат:");
-                Track t = new Track(1, "Song", "Artist", 200, 0, new[] { "Rock", "Pop" });
-                string[] bad = t.getGenre();
-                bad[0] = "Hacked";
-                bad[1] = "System";
-                Console.WriteLine(string.Join(", ", t.getGenre()));
-
-                Console.WriteLine("Защитное копирование в геттере, позволяющее запрететь изменение в хранилище\nРезультат:");
-                Track test = new Track(404, "Song", "Artist", 200, 0, new[] { "Rock", "Pop" });
-                string[] good = test.getGenres();
-                good[0] = "Hacked";
-                good[1] = "System";
-                Console.WriteLine(string.Join(", ", test.getGenres()));
 
             }
             catch (Exception e) {
@@ -87,6 +81,16 @@ namespace lab1{
                 Console.WriteLine($"Ошибка: {e.Message}");
             }
 
+        }
+
+        static void Print(PlayList playList)
+        {
+            foreach (Track music in playList.GetItems())
+            {
+                Console.WriteLine("Трек:");
+                Console.WriteLine($"{music}\n");
+
+            }
         }
 
     }
