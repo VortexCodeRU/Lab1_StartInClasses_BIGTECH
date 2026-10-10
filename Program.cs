@@ -75,12 +75,12 @@ namespace lab1{
 
         }
 
-        static void TryAdd(PlayList pl, Track t)
+        static void TryAdd(PlayList pl, MediaItem item)
         {
             try
             {
-                pl.Add(t);
-                Console.WriteLine($"Новое добавление. №{t.Key}: {t.Title} - '{t.Artist}'\n");
+                pl.Add(item);
+                Console.WriteLine($"Новое добавление. №{item.Key}: {item.Title} - '{item.Artist}'\n");
             }
             catch(ArgumentException e)
             {
