@@ -9,18 +9,22 @@ namespace lab1{
         {
             try
             {
-                Track t1 = new Track(1, "Camry 3.5", "uncleFlexxx", 192, 5_000_000, new[] { "HipHop", "Pop" });
-                Track t2 = new Track(2, "Чайная медитация", "Лю Цзыци", 687, 700, new[] { "Chill", "Symphony", "Relax" });
-                Track t3 = new Track(5, "ADD", "bbno$", 198, 30_231_110, new[] { "Rap", "HipHop", "Pop" });
-                Track t4 = new Track(2, "PEPSI", "Kamz0ner", 102, 1_212_000, new[] { "Rap", "ClubHouse", "Relax" });
-                Track t5 = new Track(11, "Лекция по выш мату", "Кожевников", 1200, 0, new[] { "CrazyHistory", "UnknownInfo", "lazy subject" });
+                AccessLevel free = new FreeAccess();
+                AccessLevel premium = new PremiumAccess();
+                AgeRating good = new NiceRating();
+                AgeRating bad = new BadRating();
+                Track t1 = new Track(1, "Camry 3.5", "uncleFlexxx", 192, 5_000_000, new[] { "HipHop", "Pop" }, premium, good);
+                Track t2 = new Track(2, "Чайная медитация", "Лю Цзыци", 687, 700, new[] { "Chill", "Symphony", "Relax" }, free, good);
+                Track t3 = new Track(5, "ADD", "bbno$", 198, 30_231_110, new[] { "Rap", "HipHop", "Pop" }, premium, bad);
+                Track t4 = new Track(2, "PEPSI", "Kamz0ner", 102, 1_212_000, new[] { "Rap", "ClubHouse", "Relax" }, free, bad);
+                Track t5 = new Track(11, "Лекция по выш мату", "Кожевников", 1200, 0, new[] { "CrazyHistory", "UnknownInfo", "lazy subject" }, free, good);
                 Track t6 = new Track(50);
                 Track t7 = new Track(51);
 
                 SelectionRule byKey = new KeySelectionRule();
                 SelectionRule byPopular = new PopularSelectionRule();
                 SelectionRule byRandom = new RandomSelectionRule();
-
+                
                 PlayList playList = new PlayList(byKey);
                 TryAdd(playList, t1);
                 TryAdd(playList, t2);
@@ -36,12 +40,7 @@ namespace lab1{
                 //Console.WriteLine(t1);
 
                 Console.WriteLine("Список треков в плейлисте:");
-                foreach (Track music in playList.GetItems())
-                {
-                    Console.WriteLine("Трек:");
-                    Console.WriteLine($"{music}\n");
-
-                }
+                Print(playList);
                 Console.WriteLine($"Всего треков в плейлисте: {playList.len()}");
                 Console.WriteLine("-------------------------------------------------------");
                 Console.WriteLine("* Плейлист отсортирован по ключам *");
@@ -61,6 +60,13 @@ namespace lab1{
                 Console.WriteLine(playList.Popular_track());
                 Console.WriteLine($"Суммарная длительность прослушиваний: {playList.sum_duration_inSeconds()} сек или {playList.sum_duration_inSeconds() / 60} мин");
                 Console.WriteLine($"Количество созданных объектов: {Track.GetTrackCount()}");
+                Console.WriteLine("-------------------------------------------------------");
+                Console.WriteLine("* Пользователь без подписки *");
+                Console.WriteLine("Трек {0}: слушать {1}", t1.Title, t1.CanPlay(false) ? "можно" : "нельзя");
+                Console.WriteLine("Трек {0}: слушать {1}", t2.Title, t2.CanPlay(false) ? "можно" : "нельзя");
+                Console.WriteLine("* Пользователь с подпиской *");
+                Console.WriteLine("Трек {0}: слушать {1}", t1.Title, t1.CanPlay(true) ? "можно" : "нельзя");
+                Console.WriteLine("Трек {0}: слушать {1}", t2.Title, t2.CanPlay(true) ? "можно" : "нельзя");
 
             }
             catch (Exception e) {
@@ -85,7 +91,7 @@ namespace lab1{
 
         static void Print(PlayList playList)
         {
-            foreach (Track music in playList.GetItems())
+            foreach (MediaItem music in playList.GetItems())
             {
                 Console.WriteLine("Трек:");
                 Console.WriteLine($"{music}\n");

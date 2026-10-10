@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Audiobook.cs" />
     <Compile Include="Duration.cs" />
+    <Compile Include="Level_Age.cs" />
     <Compile Include="MediaItem.cs" />
     <Compile Include="PlayList.cs" />
     <Compile Include="Podcast.cs" />
