@@ -43,7 +43,15 @@ namespace lab1
     }
     public class RandomSelectionRule : SelectionRule
     {
-        private readonly Random random = new Random();
+        private readonly IRandomSource random;
+        public RandomSelectionRule(IRandomSource random)
+        {
+            if (random == null)
+            {
+                throw new ArgumentNullException(nameof(random));
+            }
+            this.random = random;
+        }
 
         public void sort(MediaItem[] item, int count)
         {

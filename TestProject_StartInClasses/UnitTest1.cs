@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Xunit;
 
 namespace lab1.Tests
@@ -121,6 +122,106 @@ namespace lab1.Tests
                 sum += m.GetDuration();
 
             Assert.Equal(100 + 2 * 1800 + 300, sum);
+        }
+
+
+        // 
+        public class PlaylistServiceTests
+        {
+            private readonly AccessLevel premium = new PremiumAccess();
+            private readonly AgeRating good = new NiceRating();
+
+            private Track CreateTrack() { return new Track(1, "Song", "Artist", 180, 0, new[] { "Pop" }, premium, good); }
+
+            [Fact]
+            public void Прослушивание_сохраняет_заданное_время()
+            {
+                var expected = new DateTime(2026, 10, 24, 21, 30, 0);
+                var time = new FixedTimeSource(expected);
+                var repository = new InMemoryTrackRepository();
+                var service = new PlaylistService(time, repository);
+                var track = CreateTrack();
+
+                service.Listen(track);
+
+                Assert.Equal(expected, track.LastListenedAt);
+            }
+
+            [Fact]
+            public void Перемешивание_с_заглушкой_воспроизводимо()
+            {
+                var rule = new RandomSelectionRule(
+                    new FixedRandomSource(0, 0));
+
+                MediaItem[] items =
+                {
+                    CreateTrack(), new Track(2, "Song2", "Artist", 180, 0, new[] { "Pop" }, premium, good),
+                    new Track(3, "Song3", "Artist", 180, 0, new[] { "Pop" }, premium, good)
+                };
+
+                rule.sort(items, items.Length);
+
+                Assert.Equal(new[] { 2, 3, 1 }, Array.ConvertAll(items, item => item.Key));
+            }
+
+            [Fact]
+            public void Прослушанный_трек_сохраняется_в_библиотеке()
+            {
+                var time = new lab1.FixedTimeSource(DateTime.MinValue);
+                var repository = new InMemoryTrackRepository();
+                var service = new PlaylistService(time, repository);
+                var track = CreateTrack();
+
+                service.Listen(track);
+
+                var saved = repository.GetAll();
+
+                Assert.Single(saved);
+                Assert.Equal(track.Key, saved[0].Key);
+            }
+
+
+            public class RandomSelectionRuleTests
+            {
+                private readonly AccessLevel premium = new PremiumAccess();
+                private readonly AgeRating good = new NiceRating();
+
+                private Track CreateTrack(int key, string title) { return new Track(key, title, "Artist", 180, 0, new[] { "Pop" }, premium, good); }
+                
+                // Проверка на корректность правила сортировки
+                [Fact]
+                public void Sort_WithFixedRandomSource_ShufflesPlaylist()
+                {
+                    MediaItem[] items = { CreateTrack(1, "Track 1"), CreateTrack(2, "Track 2"), CreateTrack(3, "Track 3") };
+
+                    // Заглушка
+                    IRandomSource random = new FixedRandomSource(0, 0);
+                    SelectionRule rule = new RandomSelectionRule(random);
+
+                    // перемешиваем подборку
+                    rule.sort(items, items.Length);
+
+                    // проверка ожидаемого порядка
+                    int[] actualKeys = Array.ConvertAll(items, item => item.Key);
+
+                    Assert.Equal(new[] { 2, 3, 1 }, actualKeys);
+                }
+
+                // Проверка на кол-во треков
+                [Fact]
+                public void Sort_DoesNotLoseOrDuplicateTracks()
+                {
+                    MediaItem[] items = { CreateTrack(1, "Track 1"), CreateTrack(2, "Track 2"), CreateTrack(3, "Track 3") };
+
+                    IRandomSource random = new FixedRandomSource(0, 0);
+                    SelectionRule rule = new RandomSelectionRule(random);
+
+                    rule.sort(items, items.Length);
+
+                    Assert.Equal(3, items.Length);
+                    Assert.Equal( new[] { 1, 2, 3 }, Array.ConvertAll(items, item => item.Key).OrderBy(key => key).ToArray());
+                }
+            }
         }
     }
 }

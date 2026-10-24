@@ -55,5 +55,13 @@ namespace lab1{
         {
             return access.CanPlay(userIsPremium);
         }
+
+        public DateTime? LastListenedAt { get; private set; } // У трека может ещё не быть даты прослушивания
+        public void MarkListened(DateTime time)
+        {
+            if (time == null)
+                throw new ArgumentNullException("Ещё не прослушено");
+            LastListenedAt = time;
+        }
     }
 }
