@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Policy;
 using Xunit;
 
 namespace lab1.Tests
@@ -222,6 +225,81 @@ namespace lab1.Tests
                     Assert.Equal( new[] { 1, 2, 3 }, Array.ConvertAll(items, item => item.Key).OrderBy(key => key).ToArray());
                 }
             }
+        }
+
+        // Проверка на глобальность синголтона. Тест изолирован - значения тестов не мешают друг другу
+        [Fact]
+        public void При_нулевой_громкости_плеер_считается_выключенным()
+        {
+            var player = new Player(new PlayerSettings(0, 0));
+            Assert.True(player.IsMuted);
+        }
+        [Fact]
+        public void При_ненулевой_громкости_плеер_включён()
+        {
+            var player = new Player(new PlayerSettings(50, 0));
+            Assert.False(player.IsMuted);
+        }
+        // Player работает с interface, а не с конкретным PlayerSettings - можно ставить любую реализацию
+        public sealed class FakePlayerSettings : IPlayerSettings
+        {
+            public FakePlayerSettings(int volume, int replay) { Volume = volume; Replay = replay; }
+            public int Volume { get; }
+            public int Replay { get; }
+        }
+
+        [Fact]
+        public void Плеер_использует_внедрённую_реализацию()
+        {
+            var player = new Player(new FakePlayerSettings(volume: 0, replay: 0));
+            Assert.True(player.IsMuted);
+        } // При синголтоне - это невозможно, там жеёстко PlayerSettings.Instance
+
+        // Проверка на соотвествие типа словаря
+        [Fact]
+        public void Неизветсный_тип_отклоняется()
+        {
+            var z = new MediaItemFactory();
+            Assert.Throws<ArgumentException>(() => z.Create("video", 1, "A", "B"));
+        }
+
+        // Проверка на работу глубокой копии
+        [Fact]
+        public void Изменение_копии_не_меняет_образец()
+        {
+            var original = new WeeklyPlaylistTemplate("Week", DateTime.Today, new List<MediaItem> { new Track(1, "A", "B", 100, 0, new[] { "Pop" }, new FreeAccess(), new NiceRating()) });
+            var copy = original.Copy();
+
+            copy.SetWeekStart(DateTime.Today.AddDays(7));
+            copy.ReplaceTracks(new List<MediaItem>());
+
+            Assert.Single(original.Tracks);
+            Assert.NotEqual(original.WeekStart, copy.WeekStart);
+        }
+
+        // Проверка работы пула
+        [Fact]
+        public void После_возврата_в_пул_данные_очищены()
+        {
+            var pool = new PlaylistItemPool();
+            var v = pool.Rent();
+            v.Fill("Secret", "Artist", 200, "track");
+            pool.Return(v);
+
+            var v2 = pool.Rent(); // тот же объект или другой из стека
+            Assert.Null(v2.Title);
+            Assert.Null(v2.Artist);
+            Assert.Equal(0, v2.DurationSeconds);
+        }
+
+        [Fact]
+        public void Пул_переиспользует_объект()
+        {
+            var pool = new PlaylistItemPool();
+            var v1 = pool.Rent();
+            pool.Return(v1);
+            var v2 = pool.Rent();
+            Assert.Same(v1, v2); // тот же экземпляр
         }
     }
 }

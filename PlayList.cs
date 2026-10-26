@@ -79,20 +79,16 @@ namespace lab1
             return result_sum;
         }
 
-        public String Popular_track()
+        public string Popular_track()
         {
-            if (count == 0) {
+            if (count == 0)
                 throw new ArgumentException("Плейлист пуст\n");
-            }
-            int best = 0;
-            MediaItem best_track = null;
-            for (int i = 0; i < count; i++)
+
+            MediaItem best_track = items[0];
+            for (int i = 1; i < count; i++)
             {
-                if (best < items[i].Count_listen)
-                {
-                    best = items[i].Count_listen;
+                if (items[i].Count_listen > best_track.Count_listen)
                     best_track = items[i];
-                }
             }
             return $"Самый популярный трек - {best_track.Title} от '{best_track.Artist}'";
         }
